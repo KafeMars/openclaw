@@ -218,7 +218,8 @@ export async function sendMessageMatrix(
             })
           : undefined;
         const [firstChunk, ...rest] = chunks;
-        const body = useVoice ? "Voice message" : (firstChunk ?? media.fileName ?? "(file)");
+        const captionMarkdown = useVoice ? "" : (firstChunk ?? "");
+        const body = useVoice ? "Voice message" : captionMarkdown || media.fileName || "(file)";
         const content = buildMediaContent({
           msgtype,
           body,
@@ -235,7 +236,7 @@ export async function sendMessageMatrix(
         await enrichMatrixFormattedContent({
           client,
           content,
-          body,
+          markdown: captionMarkdown,
         });
         const eventId = await sendContent(content);
         lastMessageId = eventId ?? lastMessageId;
@@ -252,7 +253,7 @@ export async function sendMessageMatrix(
           await enrichMatrixFormattedContent({
             client,
             content: followup,
-            body: text,
+            markdown: text,
           });
           const followupEventId = await sendContent(followup);
           lastMessageId = followupEventId ?? lastMessageId;
@@ -267,7 +268,7 @@ export async function sendMessageMatrix(
           await enrichMatrixFormattedContent({
             client,
             content,
-            body: text,
+            markdown: text,
           });
           const eventId = await sendContent(content);
           lastMessageId = eventId ?? lastMessageId;
@@ -397,7 +398,7 @@ export async function sendSingleTextMessageMatrix(
       await enrichMatrixFormattedContent({
         client,
         content,
-        body: convertedText,
+        markdown: convertedText,
       });
       const eventId = await client.sendMessage(resolvedRoom, content);
       return {
@@ -440,7 +441,7 @@ export async function editMessageMatrix(
       await enrichMatrixFormattedContent({
         client,
         content: newContent,
-        body: convertedText,
+        markdown: convertedText,
       });
       const previousEvent = await client.getEvent(resolvedRoom, originalEventId).catch(() => null);
       const previousContent = resolvePreviousEditContent(previousEvent);
