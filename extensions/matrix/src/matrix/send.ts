@@ -234,7 +234,6 @@ export async function sendMessageMatrix(
         });
         await enrichMatrixFormattedContent({
           client,
-          roomId,
           content,
           body,
         });
@@ -252,7 +251,6 @@ export async function sendMessageMatrix(
           const followup = buildTextContent(text, followupRelation);
           await enrichMatrixFormattedContent({
             client,
-            roomId,
             content: followup,
             body: text,
           });
@@ -268,7 +266,6 @@ export async function sendMessageMatrix(
           const content = buildTextContent(text, relation);
           await enrichMatrixFormattedContent({
             client,
-            roomId,
             content,
             body: text,
           });
@@ -310,7 +307,6 @@ export async function sendPollMatrix(
         pollContent["m.text"] ?? pollContent["org.matrix.msc1767.text"] ?? poll.question ?? "";
       const mentions = await resolveMatrixMentionsForBody({
         client,
-        roomId,
         body: fallbackText,
       });
       const threadId = normalizeThreadId(opts.threadId);
@@ -400,7 +396,6 @@ export async function sendSingleTextMessageMatrix(
       const content = buildTextContent(convertedText, relation);
       await enrichMatrixFormattedContent({
         client,
-        roomId: resolvedRoom,
         content,
         body: convertedText,
       });
@@ -422,6 +417,7 @@ export async function editMessageMatrix(
     cfg?: CoreConfig;
     threadId?: string;
     accountId?: string;
+    timeoutMs?: number;
   } = {},
 ): Promise<string> {
   return await withResolvedMatrixSendClient(
@@ -429,6 +425,7 @@ export async function editMessageMatrix(
       client: opts.client,
       cfg: opts.cfg,
       accountId: opts.accountId,
+      timeoutMs: opts.timeoutMs,
     },
     async (client) => {
       const resolvedRoom = await resolveMatrixRoomId(client, roomId);
@@ -442,7 +439,6 @@ export async function editMessageMatrix(
       const newContent = buildTextContent(convertedText);
       await enrichMatrixFormattedContent({
         client,
-        roomId: resolvedRoom,
         content: newContent,
         body: convertedText,
       });
